@@ -1,0 +1,11 @@
+node_modules
+*/node_modules
+.DS_Store
+db/base.db
+db/base.db.bak
+*/*/base.db
+test/screenshots/
+.env
+test/.env
+test/test-report.html
+

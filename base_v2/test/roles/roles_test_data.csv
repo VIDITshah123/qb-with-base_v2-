@@ -1,0 +1,4 @@
+action,roleName,roleDescription,permissions,newRoleDescription,expected_result
+create,Test Role,A temporary role for testing,user_view,A new description for the test role,success
+edit,Test Role,A temporary role for testing,user_view,A new description for the test role,success
+delete,Test Role,A temporary role for testing,user_view,A new description for the test role,success

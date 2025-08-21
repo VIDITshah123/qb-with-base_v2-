@@ -1,0 +1,2 @@
+roleName,permissionToAssign,expected_result
+Test Role,test.permission,success

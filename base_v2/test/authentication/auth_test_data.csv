@@ -1,0 +1,6 @@
+username,password,expected_result
+admin@employdex.com,Admin@321,success
+admin,Admin@321,success
+admin,wrongpassword,failure
+wronguser,Admin@123,failure
+,,failure

@@ -1,0 +1,4 @@
+action,permissionName,permissionDescription,newPermissionDescription,expected_result
+create,test.permission,A test permission for automation,,success
+edit,test.permission,,A new description for the test permission,success
+delete,test.permission,,,success

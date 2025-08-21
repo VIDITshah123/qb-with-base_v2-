@@ -1,0 +1,4 @@
+action,username,password,firstName,lastName,mobileNumber,role,newLastName,newRole,expected_result
+create,test.user@employdex.com,Test@123,Test,User,1234567890,User,,success
+edit,test.user@employdex.com,,,,User,UserEdited,Manager,success
+delete,test.user@employdex.com,,,,,,,success

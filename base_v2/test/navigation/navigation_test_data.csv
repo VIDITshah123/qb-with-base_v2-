@@ -1,0 +1,32 @@
+linkText,expectedPath,parentLinkText
+Dashboard,/dashboard,
+Pricing,/pricing,
+Request a Feature,/feature-requests/new,
+Base Users,/users,SuperAdmin Menu
+Roles,/roles,SuperAdmin Menu
+Permissions,/permissions,SuperAdmin Menu
+Payment,/payment,SuperAdmin Menu
+Activity Logs,/logs,SuperAdmin Menu
+Analytics,/analytics,SuperAdmin Menu
+Feature Toggles,/roles/feature-toggles,SuperAdmin Menu
+File Upload Settings,/admin/file-upload-settings,SuperAdmin Menu
+Manage Customers,/customers,
+Employees,/employees/list,Manage Team
+Add Employee,/employees/create,Manage Team
+Teams,/teams/list,Manage Team
+Create Team,/teams/create,Manage Team
+Departments,/departments/list,Manage Team
+Add Department,/departments/create,Manage Team
+Manage Clients,/clients,
+Venue Management,/venues/list,
+Vendor Management,/vendors/list,
+Events,/events,Event Management
+Sub Events,/subevents/list,Event Management
+Guests,/guests/list,Event Management
+RSVPs,/rsvps/dashboard,Event Management
+Notifications,/notifications,Event Management
+Logistics Dashboard,/logistics/dashboard,Logistics
+Manage Travel,/logistics/travel,Logistics
+Manage Accommodation,/logistics/accommodation,Logistics
+Manage Vehicle Allocations,/logistics/vehicles,Logistics
+Logistics Reports,/logistics/reports,Logistics

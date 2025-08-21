@@ -1,0 +1,2 @@
+username,roleToAssign,expected_result
+test.user@employdex.com,Test Role,success

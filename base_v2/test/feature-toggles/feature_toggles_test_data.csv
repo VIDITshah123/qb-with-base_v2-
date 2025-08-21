@@ -1,0 +1,4 @@
+action,featureName,featureDescription,expected_result
+create,Test Feature,A feature for automated testing.,success
+enable,Test Feature,,success
+disable,Test Feature,,success
