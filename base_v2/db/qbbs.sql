@@ -10,7 +10,6 @@ DROP TABLE IF EXISTS qb_company_details;
 DROP TABLE IF EXISTS qb_employee_details;
 DROP TABLE IF EXISTS qb_question_answer_options;
 DROP TABLE IF EXISTS qb_question_votes;
-DROP TABLE IF EXISTS qb_question_scores;
 DROP TABLE IF EXISTS qb_audit_question_edits;
 DROP TABLE IF EXISTS qb_audit_employee_activities;
 DROP TABLE IF EXISTS qb_company_feature_toogle;
@@ -129,6 +128,10 @@ CREATE TABLE qb_master_questions (
     FOREIGN KEY (question_company_id) REFERENCES qb_master_companies(company_id),
     FOREIGN KEY (question_writer_id) REFERENCES qb_master_employees(employee_id),
     FOREIGN KEY (category_id) REFERENCES qb_master_categories(category_id),
+    created_by INTEGER NOT NULL,
+    last_updated_by INTEGER NOT NULL,
+    FOREIGN KEY (created_by) REFERENCES qb_master_employees(employee_id),
+    FOREIGN KEY (last_updated_by) REFERENCES qb_master_employees(employee_id),
     FOREIGN KEY (subcategory_id) REFERENCES qb_master_subcategories(subcategory_id)
 );
 -- Recreate the trigger
@@ -229,17 +232,6 @@ CREATE TABLE qb_question_votes (
     UNIQUE(question_id, voter_id),
     FOREIGN KEY (question_id) REFERENCES qb_master_questions(question_id),
     FOREIGN KEY (voter_id) REFERENCES qb_master_employees(employee_id)
-);
-
--- Question Scores (Denormalized for performance)
-CREATE TABLE qb_question_scores (
-    question_id INTEGER PRIMARY KEY,
-    base_score INTEGER DEFAULT 100,
-    upvotes INTEGER DEFAULT 0,
-    downvotes INTEGER DEFAULT 0,
-    total_score INTEGER GENERATED ALWAYS AS (base_score + upvotes - downvotes) STORED,
-    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (question_id) REFERENCES qb_master_questions(question_id)
 );
 
 
