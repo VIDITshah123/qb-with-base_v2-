@@ -199,6 +199,148 @@ class CompanyController {
       });
     }
   }
+
+  // Get company statistics (admin only)
+  static async getCompanyStats(req, res) {
+    try {
+      // Check if user is admin
+      if (!req.user.roles.includes('admin')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Only administrators can view company statistics'
+        });
+      }
+
+      const stats = await Company.getStats();
+      res.json({
+        success: true,
+        data: stats
+      });
+    } catch (error) {
+      console.error('Get company stats error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch company statistics',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  // Update company status (admin only)
+  static async updateCompanyStatus(req, res) {
+    try {
+      // Check if user is admin
+      if (!req.user.roles.includes('admin')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Only administrators can update company status'
+        });
+      }
+
+      const companyId = req.params.id;
+      const { isActive } = req.body;
+
+      if (typeof isActive !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'isActive must be a boolean value'
+        });
+      }
+
+      const updated = await Company.updateStatus(companyId, isActive, req.user.userId);
+
+      if (!updated) {
+        return res.status(404).json({
+          success: false,
+          message: 'Company not found or access denied'
+        });
+      }
+
+      res.json({
+        success: true,
+        message: `Company ${isActive ? 'activated' : 'deactivated'} successfully`
+      });
+    } catch (error) {
+      console.error('Update company status error:', error);
+      res.status(error.status || 500).json({
+        success: false,
+        message: error.message || 'Failed to update company status',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  // Get recent companies (admin only)
+  static async getRecentCompanies(req, res) {
+    try {
+      // Check if user is admin
+      if (!req.user.roles.includes('admin')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Only administrators can view recent companies'
+        });
+      }
+
+      const limit = parseInt(req.query.limit) || 5;
+      const companies = await Company.getRecentCompanies(limit);
+      
+      res.json({
+        success: true,
+        data: companies
+      });
+    } catch (error) {
+      console.error('Get recent companies error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch recent companies',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
+
+  // Get companies with pagination and filters (admin only)
+  static async getCompaniesPaginated(req, res) {
+    try {
+      // Check if user is admin
+      if (!req.user.roles.includes('admin')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Only administrators can view companies list'
+        });
+      }
+
+      const { 
+        page = 1, 
+        pageSize = 10, 
+        search = '', 
+        status = 'all',
+        sortBy = 'company_name',
+        sortOrder = 'asc'
+      } = req.query;
+
+      const result = await Company.findAll({
+        page: parseInt(page),
+        pageSize: parseInt(pageSize),
+        search,
+        status,
+        sortBy,
+        sortOrder
+      });
+      
+      res.json({
+        success: true,
+        data: result.data,
+        pagination: result.pagination
+      });
+    } catch (error) {
+      console.error('Get companies paginated error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch companies',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  }
 }
 
 module.exports = CompanyController;

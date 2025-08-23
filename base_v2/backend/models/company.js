@@ -45,19 +45,76 @@ class Company {
     });
   }
 
-  // Find all companies (admin only)
-  static async findAll() {
+  // Find all companies with pagination, search and filters (admin only)
+  static async findAll({ page = 1, pageSize = 10, search = '', status = 'all', sortBy = 'company_name', sortOrder = 'asc' } = {}) {
     return new Promise((resolve, reject) => {
-      db.all(
-        `SELECT c.*, u.user_email as owner_email 
-         FROM qb_master_companies c
-         JOIN base_master_users u ON c.user_id = u.user_id
-         ORDER BY c.company_name`,
-        (err, rows) => {
+      // Build the query
+      let query = `
+        SELECT c.*, u.user_email as owner_email,
+               (SELECT COUNT(*) FROM qb_master_employees e WHERE e.company_id = c.company_id) as employee_count
+        FROM qb_master_companies c
+        JOIN base_master_users u ON c.user_id = u.user_id
+        WHERE 1=1
+      `;
+      
+      const params = [];
+      
+      // Apply search filter
+      if (search) {
+        query += ` AND (
+          c.company_name LIKE ? OR 
+          c.company_gst_number LIKE ? OR 
+          u.user_email LIKE ? OR
+          c.company_city LIKE ?
+        )`;
+        const searchTerm = `%${search}%`;
+        params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+      }
+      
+      // Apply status filter
+      if (status === 'active') {
+        query += ' AND c.is_active = 1';
+      } else if (status === 'inactive') {
+        query += ' AND c.is_active = 0';
+      }
+      
+      // Add sorting
+      const validSortColumns = ['company_name', 'created_at', 'employee_count', 'is_active'];
+      const sortColumn = validSortColumns.includes(sortBy) ? sortBy : 'company_name';
+      const order = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      
+      // Get total count for pagination
+      const countQuery = `SELECT COUNT(*) as total FROM (${query})`;
+      
+      // Add sorting and pagination to main query
+      query += ` ORDER BY ${sortColumn} ${order}`;
+      query += ' LIMIT ? OFFSET ?';
+      
+      // Calculate pagination values
+      const offset = (page - 1) * pageSize;
+      
+      // Execute count query first
+      db.get(countQuery, params, (countErr, countRow) => {
+        if (countErr) return reject(countErr);
+        
+        const total = countRow.total || 0;
+        const totalPages = Math.ceil(total / pageSize);
+        
+        // Execute main query with pagination
+        db.all(query, [...params, pageSize, offset], (err, rows) => {
           if (err) return reject(err);
-          resolve(rows || []);
-        }
-      );
+          
+          resolve({
+            data: rows || [],
+            pagination: {
+              page: parseInt(page),
+              pageSize: parseInt(pageSize),
+              total,
+              totalPages
+            }
+          });
+        });
+      });
     });
   }
 
@@ -137,6 +194,67 @@ class Company {
       );
     });
   }
+
+  // Get company statistics
+  static async getStats() {
+    return new Promise((resolve, reject) => {
+      const query = `
+        SELECT 
+          COUNT(*) as total_companies,
+          SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END) as active_companies,
+          SUM(CASE WHEN is_active = 0 THEN 1 ELSE 0 END) as inactive_companies,
+          (SELECT COUNT(DISTINCT user_id) FROM qb_master_companies) as total_company_owners,
+          (SELECT COUNT(*) FROM qb_master_employees) as total_employees
+        FROM qb_master_companies
+      `;
+      
+      db.get(query, (err, row) => {
+        if (err) return reject(err);
+        resolve(row || {});
+      });
+    });
+  }
+
+  // Update company status
+  static async updateStatus(companyId, isActive, userId) {
+    // Verify user has permission
+    const company = await this.findById(companyId, userId);
+    if (!company) {
+      const error = new Error('Company not found or access denied');
+      error.status = 404;
+      throw error;
+    }
+    
+    return new Promise((resolve, reject) => {
+      db.run(
+        'UPDATE qb_master_companies SET is_active = ? WHERE company_id = ?',
+        [isActive ? 1 : 0, companyId],
+        function(err) {
+          if (err) return reject(err);
+          resolve(this.changes > 0);
+        }
+      );
+    });
+  }
+  
+  // Get recent companies
+  static async getRecentCompanies(limit = 5) {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT c.*, u.user_email as owner_email 
+         FROM qb_master_companies c
+         JOIN base_master_users u ON c.user_id = u.user_id
+         ORDER BY c.created_at DESC
+         LIMIT ?`,
+        [limit],
+        (err, rows) => {
+          if (err) return reject(err);
+          resolve(rows || []);
+        }
+      );
+    });
+  }
+
 }
 
 module.exports = Company;

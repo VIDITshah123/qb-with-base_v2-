@@ -182,6 +182,11 @@ console.log('Registered routes for votes');
 app.use('/api/widget-config', widgetConfigRoutes);
 console.log('Registered routes for widget-config');
 
+// Register admin routes
+const adminRoutes = require('./routes/admin');
+app.use('/api/admin', adminRoutes);
+console.log('Registered routes for admin');
+
 // Register each module's backend routes
 moduleNames.forEach(moduleName => {
   try {
