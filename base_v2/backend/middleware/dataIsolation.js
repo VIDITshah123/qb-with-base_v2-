@@ -1,4 +1,5 @@
 const db = require('../db');
+const Question = require('../models/question');
 
 class DataIsolation {
   // Middleware to ensure the user has access to the requested company's data

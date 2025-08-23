@@ -163,6 +163,21 @@ console.log('Registered routes for employees');
 app.use('/api/employee-roles', employeeRoleRoutes);
 console.log('Registered routes for employee roles');
 
+// Register category routes
+const categoryRoutes = require('./routes/category');
+app.use('/api/categories', categoryRoutes);
+console.log('Registered routes for categories');
+
+// Register review routes
+const reviewRoutes = require('./routes/review');
+app.use('/api/reviews', reviewRoutes);
+console.log('Registered routes for reviews');
+
+// Register vote routes
+const voteRoutes = require('./routes/vote');
+app.use('/api/votes', voteRoutes);
+console.log('Registered routes for votes');
+
 // Register widget-config routes
 app.use('/api/widget-config', widgetConfigRoutes);
 console.log('Registered routes for widget-config');

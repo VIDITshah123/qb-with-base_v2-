@@ -34,22 +34,18 @@
 - [x] Set up company-specific data isolation
 
 ### 2.3 Question Management
-- [ ] Create question CRUD endpoints
-- [ ] Implement question validation
-- [ ] Add question categorization
-- [ ] Set up question versioning
-- [ ] Implement question search and filtering
+- [x] Create question CRUD endpoints
+- [x] Implement question validation
+- [x] Add question categorization
+- [x] Set up question versioning
+- [x] Implement question search and filtering
 
 ### 2.4 Review System
-- [ ] Create review workflow
-- [ ] Implement voting system
-- [ ] Add question status tracking
-- [ ] Set up notification system
+- [x] Create review workflow
+- [x] Implement voting system
+- [x] Add question status tracking
+- [x] Set up notification system
 
-### 2.5 API Documentation
-- [ ] Document all API endpoints
-- [ ] Add request/response examples
-- [ ] Set up API versioning
 
 ## 3. Frontend Development
 
