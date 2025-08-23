@@ -12,8 +12,10 @@ const sqlite3 = require('sqlite3').verbose();
 const { body, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const session = require('express-session');
 const fs = require('fs');
 const EventEmitter = require('events');
+const { sessionConfig, sessionActivity, requireAuth } = require('./config/session');
 
 // Create a global event bus for inter-module communication
 const eventBus = new EventEmitter();
@@ -23,20 +25,41 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(helmet());
 app.use(morgan('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Session configuration
+app.use(session(sessionConfig));
+app.use(sessionActivity);
+
+// Make session available in all views
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
 
 // Serve uploaded files
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Ensure required directories exist
+const requiredDirs = [
+  'uploads',
+  'sessions',
+  'templates/emails'
+];
+
+requiredDirs.forEach(dir => {
+  const dirPath = path.join(__dirname, ...dir.split('/'));
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+});
 
 // Database initialization
 const dbPath = path.join(__dirname, '..', 'db', process.env.DB_NAME || 'base.db');
@@ -102,19 +125,46 @@ const moduleNames = [
   'payment'
 ];
 
+// Import routes
+const widgetConfigRoutes = require('./routes/widget-config');
+const paymentQrRoutes = require('./routes/payment-qr-codes');
+const paymentTransactionRoutes = require('./routes/payment-transactions');
+const featureToggleRoutes = require('./routes/feature-toggles');
+const featureRequestRoutes = require('./routes/feature-requests');
+const authRoutes = require('./routes/auth');
+const passwordResetRoutes = require('./routes/passwordReset');
+const companyRoutes = require('./routes/company');
+const employeeRoutes = require('./routes/employee');
+const employeeRoleRoutes = require('./routes/employeeRole');
+
 // Register feature-toggles routes
-const featureTogglesRouter = require('./routes/feature-toggles');
-app.use('/api/feature-toggles', featureTogglesRouter);
+app.use('/api/feature-toggles', featureToggleRoutes);
 console.log('Registered routes for feature-toggles');
 
 // Register feature-requests routes
-const featureRequestsRouter = require('./routes/feature-requests');
-app.use('/api/feature-requests', featureRequestsRouter);
+app.use('/api/feature-requests', featureRequestRoutes);
 console.log('Registered routes for feature-requests');
 
+// Register auth routes
+app.use('/api/auth', authRoutes);
+
+// Register password reset routes
+app.use('/api/password-reset', passwordResetRoutes);
+
+// Register company routes
+app.use('/api/companies', companyRoutes);
+console.log('Registered routes for companies');
+
+// Register employee routes
+app.use('/api/employees', employeeRoutes);
+console.log('Registered routes for employees');
+
+// Register employee role routes
+app.use('/api/employee-roles', employeeRoleRoutes);
+console.log('Registered routes for employee roles');
+
 // Register widget-config routes
-const widgetConfigRouter = require('./routes/widget-config');
-app.use('/api', widgetConfigRouter);
+app.use('/api/widget-config', widgetConfigRoutes);
 console.log('Registered routes for widget-config');
 
 // Register each module's backend routes

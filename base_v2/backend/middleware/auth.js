@@ -38,8 +38,17 @@ exports.authorizeRoles = (roles = []) => {
   };
 };
 
-// Middleware to check if user has required permissions
-exports.checkPermission = (permission) => {
+/**
+ * Middleware to check if user has required permissions
+ * @param {string|string[]} permissions - Single permission or array of permissions to check
+ * @param {Object} options - Options for permission checking
+ * @param {boolean} options.requireAll - If true, user must have all specified permissions
+ * @returns {Function} Express middleware function
+ */
+exports.checkPermission = (permissions, options = {}) => {
+  const { requireAll = false } = options;
+  const permissionsArray = Array.isArray(permissions) ? permissions : [permissions];
+
   return async (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ success: false, message: 'Not authenticated' });
@@ -52,14 +61,87 @@ exports.checkPermission = (permission) => {
 
     try {
       const db = req.app.locals.db;
+      const userId = req.user.userId;
+      const roleNames = req.user.roles || [];
 
-      // Check if user has the required permission
-      const hasPermission = await new Promise((resolve, reject) => {
+      if (!roleNames.length) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'No roles assigned to user' 
+        });
+      }
+
+      // Get all permissions for the user's roles
+      const placeholders = roleNames.map(() => '?').join(',');
+      const query = `
+        SELECT DISTINCT p.permission_name
+        FROM base_role_permission_link rp
+        JOIN base_master_permissions p ON rp.permission_id = p.permission_id
+        JOIN base_master_roles r ON rp.role_id = r.role_id
+        WHERE r.role_name IN (${placeholders})
+      `;
+
+      const userPermissions = await new Promise((resolve, reject) => {
+        db.all(query, roleNames, (err, rows) => {
+          if (err) return reject(err);
+          resolve(rows.map(row => row.permission_name));
+        });
+      });
+
+      // Check permissions based on requireAll flag
+      const hasPermission = requireAll 
+        ? permissionsArray.every(p => userPermissions.includes(p))
+        : permissionsArray.some(p => userPermissions.includes(p));
+
+      if (!hasPermission) {
+        const message = requireAll
+          ? `Requires all of these permissions: ${permissionsArray.join(', ')}`
+          : `Requires any of these permissions: ${permissionsArray.join(', ')}`;
+        
+        return res.status(403).json({ 
+          success: false, 
+          message,
+          requiredPermissions: permissionsArray,
+          userPermissions
+        });
+      }
+
+      // Attach user permissions to request object for later use
+      req.user.permissions = userPermissions;
+      next();
+    } catch (error) {
+      console.error('Permission check error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error checking permissions',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  };
+};
+
+/**
+ * Middleware to check company ownership or admin access
+ * @param {string} idParam - Name of the route parameter containing the company ID
+ */
+exports.checkCompanyOwnership = (idParam = 'companyId') => {
+  return async (req, res, next) => {
+    try {
+      const db = req.app.locals.db;
+      const companyId = req.params[idParam];
+      const userId = req.user.userId;
+
+      // Admin can access any company
+      if (req.user.roles && req.user.roles.includes('admin')) {
+        return next();
+      }
+
+      // Check if user is associated with the company
+      const isOwner = await new Promise((resolve, reject) => {
         db.get(
-          `SELECT 1 FROM user_permissions up
-           JOIN permissions p ON up.permission_id = p.id
-           WHERE up.user_id = ? AND p.name = ?`,
-          [req.user.id, permission],
+          `SELECT 1 FROM qb_master_companies 
+           WHERE company_id = ? AND user_id = ?`,
+          [companyId, userId],
           (err, row) => {
             if (err) return reject(err);
             resolve(!!row);
@@ -67,17 +149,21 @@ exports.checkPermission = (permission) => {
         );
       });
 
-      if (!hasPermission) {
+      if (!isOwner) {
         return res.status(403).json({ 
           success: false, 
-          message: `You don't have permission to ${permission}` 
+          message: 'You do not have permission to access this company' 
         });
       }
 
       next();
     } catch (error) {
-      console.error('Permission check error:', error);
-      return res.status(500).json({ success: false, message: 'Error checking permissions' });
+      console.error('Company ownership check error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Error verifying company ownership',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   };
 };
