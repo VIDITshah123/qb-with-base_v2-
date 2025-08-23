@@ -43,7 +43,7 @@ CREATE TABLE qb_master_companies (
     UNIQUE(user_id, company_name)
 );
 -- Create a trigger to check user role before inserting into qb_master_companies
-CREATE TRIGGER IF NOT EXISTS check_company_role_before_insert
+CREATE TRIGGER IF NOT EXISTS check_company_role_before_insert_qb_master_companies
 BEFORE INSERT ON qb_master_companies
 FOR EACH ROW
 BEGIN
@@ -73,7 +73,7 @@ CREATE TABLE qb_master_employees (
     UNIQUE(user_id, employee_id)
 );
 -- Create a trigger to check user role before inserting into qb_master_employees
-CREATE TRIGGER IF NOT EXISTS check_employee_role_before_insert
+CREATE TRIGGER IF NOT EXISTS check_employee_role_before_insert_qb_master_employees
 BEFORE INSERT ON qb_master_employees
 FOR EACH ROW
 BEGIN
@@ -134,22 +134,22 @@ CREATE TABLE qb_master_questions (
     FOREIGN KEY (last_updated_by) REFERENCES qb_master_employees(employee_id),
     FOREIGN KEY (subcategory_id) REFERENCES qb_master_subcategories(subcategory_id)
 );
--- Recreate the trigger
-CREATE TRIGGER IF NOT EXISTS check_employee_role_before_insert
-BEFORE INSERT ON qb_master_employees
+-- Create a trigger to check user role before inserting into qb_master_questions
+CREATE TRIGGER IF NOT EXISTS check_question_role_before_insert_qb_master_questions
+BEFORE INSERT ON qb_master_questions
 FOR EACH ROW
 BEGIN
-    -- Check if the user has either 'question_writer' or 'reviewer' role
+    -- Check if the user has either 'question_writer' or 'Admin' role
     SELECT 
         CASE 
             WHEN NOT EXISTS (
                 SELECT 1 
                 FROM base_role_user_link rl
                 JOIN base_master_roles r ON rl.role_id = r.role_id
-                WHERE rl.user_id = NEW.user_id 
-                AND r.role_name IN ('question_writer', 'reviewer')
+                WHERE rl.user_id = NEW.question_writer_id 
+                AND r.role_name IN ('question_writer', 'Admin')
             ) 
-            THEN RAISE(ABORT, 'Only users with question_writer or reviewer role can be added as employees')
+            THEN RAISE(ABORT, 'Only users with question_writer or Admin role can create questions')
         END;
 END;
 
