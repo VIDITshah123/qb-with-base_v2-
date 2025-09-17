@@ -97,8 +97,21 @@
   - [x] Status history timeline
 
 ### 3.5 User Experience
-- [ ] Add loading states
-- [ ] Implement error handling
-- [ ] Add form validation
-- [ ] Set up toast notifications
+- [x] Add loading states
+  - [x] Implement LoadingSpinner component
+  - [x] Add loading states to async operations
+  - [x] Create useAsync hook for consistent loading state management
+- [x] Implement error handling
+  - [x] Create ErrorBoundary component
+  - [x] Add error boundaries to route components
+  - [x] Implement graceful error recovery
+- [x] Add form validation
+  - [x] Create validation schemas
+  - [x] Integrate with Formik forms
+  - [x] Add client-side validation feedback
+- [x] Set up toast notifications
+  - [x] Create toast utility
+  - [x] Add success/error/info notifications
+  - [x] Implement loading toasts for long-running operations
+- [x] Document UX patterns and best practices
 
