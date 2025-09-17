@@ -68,10 +68,14 @@
 - [x] Implement role assignment interface
 
 ### 3.3 Question Management
-- [ ] Create question editor
-- [ ] Build question list view
-- [ ] Add question filtering and search
-- [ ] Implement question import/export
+- [x] Create question editor
+- [x] Build question list view
+- [x] Add question filtering and search
+- [x] Implement question import/export
+  - [x] Export to CSV/Excel
+  - [x] Import from CSV/Excel
+  - [x] Download template
+  - [x] Bulk upload with validation
 
 ### 3.4 Review Interface
 - [ ] Create review dashboard
@@ -84,38 +88,4 @@
 - [ ] Implement error handling
 - [ ] Add form validation
 - [ ] Set up toast notifications
-
-<!-- ## 4. Testing
-
-### 4.1 Unit Testing
-- [ ] Test database models
-- [ ] Test API endpoints
-- [ ] Test utility functions
-
-### 4.2 Integration Testing
-- [ ] Test user flows
-- [ ] Test role-based access
-- [ ] Test question workflow
-
-### 4.3 End-to-End Testing
-- [ ] Test complete user journeys
-- [ ] Test error scenarios
-- [ ] Test performance
-
-## 5. Deployment
-
-### 5.1 Environment Setup
-- [ ] Configure production database
-- [ ] Set up environment variables
-- [ ] Configure logging and monitoring
-
-### 5.2 CI/CD Pipeline
-- [ ] Set up automated testing
-- [ ] Configure deployment pipeline
-- [ ] Set up staging environment
-
-### 5.3 Documentation
-- [ ] Write user guide
-- [ ] Create admin documentation
-- [ ] Document deployment process -->
 

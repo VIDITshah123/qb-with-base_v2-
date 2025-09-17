@@ -94,6 +94,12 @@ const Sidebar = ({ collapsed }) => {
       permission: null // Everyone can access dashboard
     },
     {
+      name: 'Question Bank',
+      path: '/questions',
+      icon: <FaList />,
+      permission: 'view_questions' // Only users with view_questions permission can access
+    },
+    {
       name: 'Pricing',
       path: '/pricing',
       icon: <FaTag />,

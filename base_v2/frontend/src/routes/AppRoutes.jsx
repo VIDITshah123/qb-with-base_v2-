@@ -14,10 +14,7 @@ const ResetPasswordPage = lazy(() => import('../pages/auth/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('../pages/auth/VerifyEmailPage'));
 const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage'));
 const ProfilePage = lazy(() => import('../pages/profile/ProfilePage'));
-const QuestionsPage = lazy(() => import('../pages/questions/QuestionsPage'));
-const QuestionDetailPage = lazy(() => import('../pages/questions/QuestionDetailPage'));
-const CreateQuestionPage = lazy(() => import('../pages/questions/CreateQuestionPage'));
-const EditQuestionPage = lazy(() => import('../pages/questions/EditQuestionPage'));
+const QuestionsPage = lazy(() => import('../pages/QuestionsPage'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'));
 const UsersPage = lazy(() => import('../pages/admin/UsersPage'));
 import EmployeeRoutes from './employeeRoutes';
@@ -79,10 +76,7 @@ const AppRoutes = () => {
           {/* User Routes */}
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="questions" element={<QuestionsPage />} />
-          <Route path="questions/create" element={<CreateQuestionPage />} />
-          <Route path="questions/:id" element={<QuestionDetailPage />} />
-          <Route path="questions/:id/edit" element={<EditQuestionPage />} />
+          <Route path="questions/*" element={<QuestionsPage />} />
 
           {/* Admin Routes */}
           <Route path="admin" element={
