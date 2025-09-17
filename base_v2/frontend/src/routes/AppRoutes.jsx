@@ -18,6 +18,7 @@ const QuestionsPage = lazy(() => import('../pages/QuestionsPage'));
 const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage'));
 const UsersPage = lazy(() => import('../pages/admin/UsersPage'));
 import EmployeeRoutes from './employeeRoutes';
+import ReviewDashboard from '../components/reviews/ReviewDashboard';
 const NotFoundPage = lazy(() => import('../pages/error/NotFoundPage'));
 const UnauthorizedPage = lazy(() => import('../pages/error/UnauthorizedPage'));
 
@@ -77,6 +78,11 @@ const AppRoutes = () => {
           <Route path="dashboard" element={<DashboardPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="questions/*" element={<QuestionsPage />} />
+          <Route path="reviews" element={
+            <ProtectedRoute roles={['admin', 'reviewer']}>
+              <ReviewDashboard />
+            </ProtectedRoute>
+          } />
 
           {/* Admin Routes */}
           <Route path="admin" element={
